@@ -3,6 +3,11 @@ const path = require('path');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+const playground = require('./playground');
+
+app.get('/api/:board', (req, res) => {
+    res.send(playground.board);
+});
 
 app.use('/:board', express.static(path.join(__dirname, 'public')));
 app.use('/', (req, res) => {

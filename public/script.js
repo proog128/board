@@ -1,11 +1,5 @@
-const numCells = 3;
+let numColumns = 0;
 const boardName = window.location.pathname.split('/').filter(s => s)[0];
-
-const socket = io({
-    'query': {
-        'board': boardName
-    }
-});
 
 // Create element from HTML template.
 function create(templateId) {
@@ -23,7 +17,15 @@ function initDrag(row) {
             return !(el.classList.contains('item') || el.classList.contains('textarea'));
         },
         accepts: (el, target, source, sibling) => {
-            return source.parentNode == target.parentNode;
+            if (source.parentNode != target.parentNode) {
+                return false;
+            }
+            const isHeaderItem = el.classList.contains('row-header');
+            const isHeaderCell = target.classList.contains('row-header');
+            if (isHeaderCell && !isHeaderItem) {
+                return false;
+            }
+            return true;
         }
     });
     drake.on('drop', (element, target, source, sibling) => {
@@ -33,12 +35,25 @@ function initDrag(row) {
 
 // Add an item before sibling to a cell. If id is null, a random
 // id is generated. If sibling is null, the item is appended to the end.
-function addItem(cell, id, sibling) {
+function addItem(cell, id, sibling, content) {
     const item = create('titem');
     item.id = id ?? uuidv4();
+    item.querySelector('.textarea').innerText = content ?? '';
     cell.insertBefore(item, sibling);
     return item;
 };
+
+// Add header item to a cell. If id is null, a random id is generated.
+// If sibling is null, the item is appended to the end.
+function addHeaderItem(cell, id, sibling, color, content) {
+    const item = create('titemheader');
+    item.classList.add('row-header');
+    item.classList.add(color ?? 'green');
+    item.id = id ?? uuidv4();
+    item.querySelector('.textarea').innerHTML = content ?? '';
+    cell.insertBefore(item, sibling);
+    return item;
+}
 
 // Updates the text content of an item.
 function updateItemContent(item, content) {
@@ -79,33 +94,24 @@ function moveItem(item, cell, sibling) {
 }
 
 // Add a row before sibling to the table. Automatically creates all cells
-// and a header item. The header item is added to the first column. If id,
-// cellIds, or headerItemId is null, random ids are generated. If sibling
+// If id or cellIds is null, random ids are generated. If sibling
 // is null, the row is appended to the end.
-function addRow(title, type, id, cellIds, headerItemId, sibling) {
+function addRow(id, cellIds, sibling) {
     const row = create('trow');
-    let newCellIds = [];
-    let newHeaderItemId = '';
+    let newCells = [];
     row.id = id ?? uuidv4();
-    for (let i=0; i<numCells; ++i) {
+    for (let i=0; i<numColumns; ++i) {
         const cell = create('tcell');
         if (i == 0) {
-            const item = create('titemheader');
             cell.classList.add('row-header');
-            item.classList.add('row-header');
-            item.classList.add(type ?? 'green');
-            item.id = headerItemId ?? uuidv4();
-            item.querySelector('.textarea').innerText = title ?? '';
-            cell.appendChild(item);
-            newHeaderItemId = item.id;
         }
         if (cellIds) {
             cell.id = cellIds[i];
         } else {
             cell.id = uuidv4();
-            newCellIds.push(cell.id);
         }
 
+        newCells.push(cell);
         row.appendChild(cell);
     }
     initDrag(row);
@@ -113,7 +119,7 @@ function addRow(title, type, id, cellIds, headerItemId, sibling) {
     const table = document.querySelector('.table');
     table.insertBefore(row, sibling);
 
-    return [row, newCellIds, newHeaderItemId];
+    return [row, newCells];
 }
 
 // Move row from current position to the position before
@@ -177,6 +183,12 @@ function emitMoveRow(row, sibling) {
 
 // Receive messages from server.
 
+const socket = io({
+    'query': {
+        'board': boardName
+    }
+});
+
 socket.on('additem', (itemId, cellId, siblingId) => {
     const item = document.getElementById(itemId);
     const cell = document.getElementById(cellId);
@@ -222,7 +234,8 @@ socket.on('addrow', (rowId, cellIds, headerItemId, siblingId) => {
     if (row) {
         moveRow(row, sibling);
     } else {
-        addRow(null, null, rowId, cellIds, headerItemId, sibling);
+        const [row, cells] = addRow(rowId, cellIds, sibling);
+        addHeaderItem(cells[0], headerItemId);
     }
 });
 
@@ -244,9 +257,11 @@ socket.on('deleterow', (rowId) => {
 // Event handlers bound in HTML.
 
 window.addRow = () => {
-    const [row, cellIds, headerItemId] = addRow();
+    const [row, cells] = addRow();
+    const cellIds = cells.map((c) => c.id);
+    const headerItem = addHeaderItem(cells[0]);
     row.querySelector('.textarea').focus();
-    emitAddRow(row, cellIds, headerItemId, row.nextElementSibling);
+    emitAddRow(row, cellIds, headerItem.id, row.nextElementSibling);
 };
 window.deleteRow = (el) => {
     const row = el.closest('.row');
@@ -275,7 +290,7 @@ window.deleteItem = (el) => {
     emitDeleteItem(item);
 };
 
-window.onload = () => {
+window.onload = async () => {
     const table = document.querySelector('.table');
     const tableDrake = dragula([table], {
         direction: 'vertical',
@@ -291,4 +306,29 @@ window.onload = () => {
     rows.forEach((row) => {
         initDrag(row);
     });
+
+    const dataResponse = await fetch('/api/' + boardName);
+    if (!dataResponse.ok) return;
+
+    const data = await dataResponse.json();
+    numColumns = data.columns.length;
+    
+    for (const rowData of data.rows) {
+        const rowId = rowData.id;
+        const cellIds = rowData.cells.map((c) => c.id);
+        const [newRow, cells] = addRow(rowId, cellIds);
+        rowData.cells.forEach((cellData, i) => {
+            cellData.items.forEach((itemData, j) => {
+                const itemId = itemData.id;
+                const sibling = itemData[i + 1]?.id;
+                const color = itemData.color;
+                const content = itemData.content;
+                if (itemData.type == 'header') {
+                    addHeaderItem(cells[i], itemId, sibling, color, content);
+                } else {
+                    addItem(cells[i], itemId, sibling, content);
+                }
+            });
+        });
+    }
 }
