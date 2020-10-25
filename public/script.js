@@ -20,7 +20,7 @@ function initDrag(row) {
             if (source.parentNode != target.parentNode) {
                 return false;
             }
-            const isHeaderItem = el.classList.contains('row-header');
+            const isHeaderItem = el.classList.contains('large');
             const isHeaderCell = target.classList.contains('row-header');
             if (isHeaderCell && !isHeaderItem) {
                 return false;
@@ -35,25 +35,18 @@ function initDrag(row) {
 
 // Add an item before sibling to a cell. If id is null, a random
 // id is generated. If sibling is null, the item is appended to the end.
-function addItem(cell, id, sibling, content) {
+function addItem(cell, id, sibling, classList, content) {
     const item = create('titem');
+    if (classList) {
+        classList.forEach(c => {
+            item.classList.add(c);
+        });
+    }
     item.id = id ?? uuidv4();
     item.querySelector('.textarea').innerText = content ?? '';
     cell.insertBefore(item, sibling);
     return item;
 };
-
-// Add header item to a cell. If id is null, a random id is generated.
-// If sibling is null, the item is appended to the end.
-function addHeaderItem(cell, id, sibling, color, content) {
-    const item = create('titemheader');
-    item.classList.add('row-header');
-    item.classList.add(color ?? 'green');
-    item.id = id ?? uuidv4();
-    item.querySelector('.textarea').innerHTML = content ?? '';
-    cell.insertBefore(item, sibling);
-    return item;
-}
 
 // Updates the text content of an item.
 function updateItemContent(item, content) {
@@ -196,7 +189,7 @@ socket.on('additem', (itemId, cellId, siblingId) => {
     if (item) {
         moveItem(item, cell, sibling);
     } else {
-        addItem(cell, itemId, sibling);
+        addItem(cell, itemId, null, sibling);
     }
 });
 
@@ -235,7 +228,7 @@ socket.on('addrow', (rowId, cellIds, headerItemId, siblingId) => {
         moveRow(row, sibling);
     } else {
         const [row, cells] = addRow(rowId, cellIds, sibling);
-        addHeaderItem(cells[0], headerItemId);
+        addItem(cells[0], headerItemId, null, 'large green');
     }
 });
 
@@ -254,12 +247,16 @@ socket.on('deleterow', (rowId) => {
     }
 });
 
+socket.on('errormsg', (message) => {
+    console.log(`Error returned from server: ${message}`);
+});
+
 // Event handlers bound in HTML.
 
 window.addRow = () => {
     const [row, cells] = addRow();
     const cellIds = cells.map((c) => c.id);
-    const headerItem = addHeaderItem(cells[0]);
+    const headerItem = addItem(cells[0], null, null, ['large', 'green']);
     row.querySelector('.textarea').focus();
     emitAddRow(row, cellIds, headerItem.id, row.nextElementSibling);
 };
@@ -308,8 +305,11 @@ window.onload = async () => {
     });
 
     const dataResponse = await fetch('/api/' + boardName);
-    if (!dataResponse.ok) return;
-
+    if (!dataResponse.ok) {
+        console.log(dataResponse.status + ' ' + dataResponse.statusText);
+        return;
+    }
+  
     const data = await dataResponse.json();
     numColumns = data.columns.length;
     
@@ -321,13 +321,9 @@ window.onload = async () => {
             cellData.items.forEach((itemData, j) => {
                 const itemId = itemData.id;
                 const sibling = itemData[i + 1]?.id;
-                const color = itemData.color;
+                const classList = itemData.classList;
                 const content = itemData.content;
-                if (itemData.type == 'header') {
-                    addHeaderItem(cells[i], itemId, sibling, color, content);
-                } else {
-                    addItem(cells[i], itemId, sibling, content);
-                }
+                addItem(cells[i], itemId, sibling, classList, content);
             });
         });
     }

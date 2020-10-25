@@ -92,7 +92,7 @@ html, body {
     z-index: 98;
 }
 
-.item.row-header {
+.item.large {
     color: #fdf6e3;
     padding: 10px;
     margin: 5px;
@@ -116,15 +116,15 @@ html, body {
     border-left: 20px solid #586e75;
 }
 
-.item.row-header.green {
+.item.large.green {
     background-color: #859900;
 }
 
-.item.row-header.red {
+.item.large.red {
     background-color: #dc322f;
 }
 
-.item.row-header.blue {
+.item.large.blue {
     background-color: #268bd2;
 }
 
