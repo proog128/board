@@ -25,6 +25,10 @@ function initDrag(row) {
             if (isHeaderCell && !isHeaderItem) {
                 return false;
             }
+            const isBeforeToolbar = sibling?.classList.contains('toolbar');
+            if (isBeforeToolbar) {
+                return false;
+            }
             return true;
         }
     });
