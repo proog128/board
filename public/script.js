@@ -35,12 +35,13 @@ function initDrag(row) {
 
 // Add an item before sibling to a cell. If id is null, a random
 // id is generated. If sibling is null, the item is appended to the end.
-function addItem(cell, id, sibling, classList, content) {
-    const item = create('titem');
-    if (classList) {
-        classList.forEach(c => {
-            item.classList.add(c);
-        });
+function addItem(cell, id, sibling, type, color, content) {
+    const item = create(type == 'large' ? 'titemheader' : 'titem');
+    if (type) {
+        item.classList.add(type);
+    }
+    if (color) {
+        item.classList.add(color);
     }
     item.id = id ?? uuidv4();
     item.querySelector('.textarea').innerText = content ?? '';
@@ -189,7 +190,7 @@ socket.on('additem', (itemId, cellId, siblingId) => {
     if (item) {
         moveItem(item, cell, sibling);
     } else {
-        addItem(cell, itemId, null, sibling);
+        addItem(cell, itemId, sibling);
     }
 });
 
@@ -228,7 +229,7 @@ socket.on('addrow', (rowId, cellIds, headerItemId, siblingId) => {
         moveRow(row, sibling);
     } else {
         const [row, cells] = addRow(rowId, cellIds, sibling);
-        addItem(cells[0], headerItemId, null, 'large green');
+        addItem(cells[0], headerItemId, null, 'large', 'green');
     }
 });
 
@@ -256,7 +257,7 @@ socket.on('errormsg', (message) => {
 window.addRow = () => {
     const [row, cells] = addRow();
     const cellIds = cells.map((c) => c.id);
-    const headerItem = addItem(cells[0], null, null, ['large', 'green']);
+    const headerItem = addItem(cells[0], null, null, 'large', 'green');
     row.querySelector('.textarea').focus();
     emitAddRow(row, cellIds, headerItem.id, row.nextElementSibling);
 };
@@ -321,9 +322,8 @@ window.onload = async () => {
             cellData.items.forEach((itemData, j) => {
                 const itemId = itemData.id;
                 const sibling = itemData[i + 1]?.id;
-                const classList = itemData.classList;
-                const content = itemData.content;
-                addItem(cells[i], itemId, sibling, classList, content);
+                addItem(cells[i], itemId, sibling, itemData.type,
+                    itemData.color, itemData.content);
             });
         });
     }

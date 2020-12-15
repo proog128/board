@@ -5,6 +5,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const demoBoard = require('./demoBoard');
 const emptyBoard = require('./emptyBoard');
+const aggregations = require('./aggregations');
 const MongoClient = require('mongodb').MongoClient;
 
 const mongoUri = 'mongodb://root:example@localhost:27017/?poolSize=20&w=majority';
@@ -19,20 +20,71 @@ function createEmptyBoard(boardName) {
     return board;
 }
 
+async function addItem(boardName, itemId, cellId, siblingId) {
+    const item = {
+        id: itemId,
+        content: ''
+    };
+    const result = await boards.updateOne(
+        { name: boardName },
+        aggregations.addItem(item, cellId, siblingId)
+    );
+    if (result.modifiedCount == 0) {
+        throw (`Failed to insert item ${itemId} before ${siblingId} into cell ${cellId} in ${boardName}.`);
+    } 
+}
+
+async function moveItem(boardName, itemId, cellId, siblingId) {
+    const result = await boards.updateOne(
+        { name: boardName },
+        aggregations.moveItem(itemId, cellId, siblingId)
+    );
+    if (result.modifiedCount == 0) {
+        throw (`Failed to move item ${itemId} before ${siblingId} into cell ${cellId} in ${boardName}.`);
+    } 
+}
+
+async function deleteItem(boardName, itemId) {
+    const result = await boards.updateOne(
+        { name: boardName },
+        aggregations.deleteItem(itemId)
+    );
+    if (result.modifiedCount == 0) {
+        throw (`Failed to delete item ${itemId} in ${boardName}.`);
+    } 
+}
+
+async function getItemPos(boardName, itemId) {
+    const result = await boards.findOne(
+        { name: boardName },
+        { projection: aggregations.getItemPos(itemId)});
+    if (result.length == 0) {
+        throw (`Failed to retrieve item ${itemId} in ${boardName}.`);
+    }
+    return result.result[0];
+}
+
+async function updateItem(boardName, itemId, data) {
+    const result = await boards.updateOne(
+        { name: boardName },
+        aggregations.updateItem(itemId, data)
+    );
+    if (result.modifiedCount == 0) {
+        throw (`Failed to update item ${itemId} in ${boardName}.`);
+    }
+}
+
+async function getItem(boardName, itemId) {
+    const result = await boards.findOne(
+        { name: boardName },
+        { projection: aggregations.getItem(itemId)});
+    if (result.length == 0) {
+        throw (`Failed to retrieve item ${itemId} in ${boardName}.`);
+    }
+    return result.result[0];
+}
+
 async function addRow(boardName, rowId, cellIds, headerId, siblingId) {
-    let board = await boards.findOne(
-        { name: boardName });
-    if (board == null) {
-        board = createEmptyBoard(boardName);
-        const result = boards.insertOne(board);
-        if (result.insertedCount == 0) {
-            throw(`Failed to create empty board ${boardName}.`);
-        }
-    }
-    let pos = board.rows.length;
-    if (siblingId) {
-        pos = board.rows.findIndex(e => e.id == siblingId);
-    }
     let row = {
         id: rowId,
         cells: cellIds.map(cellId => {
@@ -42,19 +94,49 @@ async function addRow(boardName, rowId, cellIds, headerId, siblingId) {
             };
         })
     };
-    row.cells[0].items.push({ id: headerId, classList: ['large', 'green'] });
+    row.cells[0].items.push({ id: headerId, type: 'large', color: 'green' });
+
     const result = await boards.updateOne(
         { name: boardName },
-        { $push: {
-            rows: {
-                $each: [ row ],
-                $position: pos
-            }
-        }
-    });
+        aggregations.addRow(row, siblingId)
+    );
     if (result.modifiedCount == 0) {
-        throw(`Failed to insert row ${rowId} at index ${pos} into ${boardName}.`);
+        throw (`Failed to insert row ${rowId} before ${siblingId} into ${boardName}.`);
     }
+}
+
+async function moveRow(boardName, rowId, siblingId) {
+    const result = await boards.updateOne(
+        { name: boardName },
+        aggregations.moveRow(rowId, siblingId)
+    );
+    if (result.modifiedCount == 0) {
+        throw (`Failed to move row ${rowId} to ${siblingId} in board ${boardName}.`);
+    }
+}
+
+async function deleteRow(boardName, rowId) {
+    const result = await boards.updateOne(
+        { name: boardName },
+        { $pull: {
+            rows: {
+                id: rowId
+            }
+        }}
+    );
+    if (result.modifiedCount == 0) {
+        throw (`Failed to delete row ${rowId} of ${boardName}.`);
+    }
+}
+
+async function getRowPos(boardName, rowId) {
+    const result = await boards.findOne(
+        { name: boardName },
+        { projection: aggregations.getRowPos(rowId)});
+    if (result.length == 0) {
+        throw (`Failed to retrieve row ${rowId} in ${boardName}.`);
+    }
+    return result.result[0];
 }
 
 app.get('/api/demo/reset', async (req, res) => {
@@ -93,35 +175,106 @@ io.on('connect', (socket) => {
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
-    socket.on('additem', (item, cell, sibling) => {
-        io.in(boardName).emit('additem', item, cell, sibling);
+    socket.on('additem', async (itemId, cellId, siblingId) => {
+        try {
+            await addItem(boardName, itemId, cellId, siblingId);
+        } catch (err) {
+            console.log(err);
+        }
+        try {
+            const pos = await getItemPos(boardName, itemId);
+            io.in(boardName).emit('additem', itemId, pos.cellId, pos.siblingId);
+        } catch (err) {
+            io.in(boardName).emit('deleteitem', itemId);
+            console.log(err);
+        }            
     });
-    socket.on('updateitemcontent', (item, content) => {
-        io.in(boardName).emit('updateitemcontent', item, content);
+    socket.on('updateitemcontent', async (itemId, content) => {
+        try {
+            await updateItem(boardName, itemId, { content: content });
+        } catch (err) {
+            console.log(err);
+        }
+        try {
+            const item = await getItem(boardName, itemId);
+            io.in(boardName).emit('updateitemcontent', itemId, item.content);
+        } catch (err) {
+            io.in(boardName).emit('deleteitem', itemId);
+            console.log(err);
+        }
     });
-    socket.on('updateitemcolor', (item, color) => {
-        io.in(boardName).emit('updateitemcolor', item, color);
+    socket.on('updateitemcolor', async (itemId, color) => {
+        try {
+            await updateItem(boardName, itemId, { color: color });
+        } catch (err) {
+            console.log(err);
+        }
+        try {
+            const item = await getItem(boardName, itemId);
+            io.in(boardName).emit('updateitemcolor', item, item.color);
+        } catch (err) {
+            io.in(boardName).emit('deleteitem', itemId);
+            console.log(err);
+        }
+
     });
-    socket.on('deleteitem', (item) => {
-        io.in(boardName).emit('deleteitem', item);
+    socket.on('deleteitem', async (itemId) => {
+        try {
+            await deleteItem(boardName, itemId);
+        } catch (err) {
+            console.log(err);
+        }
+        io.in(boardName).emit('deleteitem', itemId);
     });
-    socket.on('moveitem', (item, cell, sibling) => {
-        io.in(boardName).emit('moveitem', item, cell, sibling);
+    socket.on('moveitem', async (itemId, cellId, siblingId) => {
+        try {
+            await moveItem(boardName, itemId, cellId, siblingId);
+        } catch (err) {
+            console.log(err);
+        }
+        try {
+            const pos = await getItemPos(boardName, itemId);
+            io.in(boardName).emit('moveitem', itemId, pos.cellId, pos.siblingId);
+        } catch (err) {
+            io.in(boardName).emit('deleteitem', itemId);
+            console.log(err);
+        }
     });
     socket.on('addrow', async (rowId, cellIds, headerId, siblingId) => {
         try {
             await addRow(boardName, rowId, cellIds, headerId, siblingId);
-            io.in(boardName).emit('addrow', rowId, cellIds, headerId, siblingId);
-        } catch(err) {
-            socket.emit('errormsg', err);
-            socket.emit('deleterow', rowId);
+        } catch (err) {
+            console.log(err);
+        }
+        try {
+            const pos = await getRowPos(boardName, rowId);
+            io.in(boardName).emit('addrow', rowId, cellIds, headerId, pos.siblingId);
+        } catch (err) {
+            io.in(boardName).emit('deleterow', rowId);
+            console.log(err);
+        }            
+    });
+    socket.on('moverow', async (rowId, siblingId) => {
+        try {
+            await moveRow(boardName, rowId, siblingId);
+        } catch (err) {
+            console.log(err);
+        }
+        try {
+            const pos = await getRowPos(boardName, rowId);
+            io.in(boardName).emit('moverow', rowId, pos.siblingId);
+        } catch (err) {
+            io.in(boardName).emit('deleterow', rowId);
+            console.log(err);
         }
     });
-    socket.on('moverow', (row, sibling) => {
-        io.in(boardName).emit('moverow', row, sibling);
-    });
-    socket.on('deleterow', (row) => {
-        io.in(boardName).emit('deleterow', row);
+    socket.on('deleterow', async (rowId) => {
+        try {
+            await deleteRow(boardName, rowId);
+        } catch (err) {
+            console.log(err);
+        }
+        io.in(boardName).emit('deleterow', rowId);
     });
 });
 
