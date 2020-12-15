@@ -6,6 +6,16 @@
     </head>
     <body>
         <button id="addrow" onclick="addRow()">Add Row</button>
+        <div class="table-header">
+            <div class="row">
+                <template id="thcellfirst">
+                    <div class="cell row-header"></div>
+                </template>
+                <template id="thcell">
+                    <div class="cell"></div>
+                </template>
+            </div>
+        </div>
         <div class="table" id="board">
             <template id="trow">
                 <div class="row">

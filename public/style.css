@@ -25,6 +25,7 @@ html, body {
     color: #fdf6e3;
     background-color: #586e75;
     border: 2px solid #93a1a1;
+    border-radius: 4px;
     width: 50%;
     margin: auto;
     padding: 10px;
@@ -93,6 +94,11 @@ html, body {
     flex-shrink: 0;
 }
 
+.table-header .cell {
+    text-align: center;
+    display: block;
+}
+
 .item {
     width: 100px;
     height: 100px;
@@ -157,3 +163,11 @@ html, body {
     background-color: #268bd2;
 }
 
+.table-header .row {
+    background-color: #586e75;
+}
+
+.table-header .cell {
+    color: #93a1a1;
+    font-weight: bold;
+}

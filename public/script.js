@@ -316,11 +316,6 @@ window.onload = async () => {
     tableDrake.on('drop', (element, target, source, sibling) => {
         emitMoveRow(element, sibling);
     });
-    
-    const rows = document.querySelectorAll('.row');
-    rows.forEach((row) => {
-        initDrag(row);
-    });
 
     const dataResponse = await fetch('/api/' + boardName);
     if (!dataResponse.ok) {
@@ -331,6 +326,13 @@ window.onload = async () => {
     const data = await dataResponse.json();
     numColumns = data.columns.length;
     
+    const thead = document.querySelector('.table-header .row');
+    for (let i = 0; i < numColumns; ++i) {
+        const hcell = create(i == 0 ? 'thcellfirst' : 'thcell');
+        hcell.innerText = data.columns[i];
+        thead.appendChild(hcell);
+    }
+
     for (const rowData of data.rows) {
         const rowId = rowData.id;
         const cellIds = rowData.cells.map((c) => c.id);
