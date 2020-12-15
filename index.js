@@ -77,7 +77,7 @@ async function updateItem(boardName, itemId, data) {
         aggregations.updateItem(itemId, data)
     );
     if (result.modifiedCount == 0) {
-        console.log(`Failed to update item ${itemId} in ${boardName}.`);
+        console.log(`Failed to update item ${itemId} in ${boardName}. Maybe the item did not change?`);
         return false;
     }
     return true;
