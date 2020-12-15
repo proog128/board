@@ -6,7 +6,7 @@
     </head>
     <body>
         <button id="addrow" onclick="addRow()">Add Row</button>
-        <div class="table">
+        <div class="table" id="board">
             <template id="trow">
                 <div class="row">
                     <div class="toolbar">
@@ -40,6 +40,7 @@
                 </div>
             </template>
         </div>
+        <div id="connectionlost"><div class="blocker">&nbsp;</div><div class="message">Connection lost. <button onclick="location.reload()">Reload</button></div></div>
         <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>

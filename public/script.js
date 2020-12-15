@@ -256,6 +256,19 @@ socket.on('errormsg', (message) => {
     console.log(`Error returned from server: ${message}`);
 });
 
+socket.on('disconnect', () => {
+    console.log('Connection lost.');
+
+    let message = document.getElementById('connectionlost');
+    message.style.visibility = 'visible';
+
+    let table = document.getElementById('board');
+    table.style.pointerEvents = 'none';
+    table.style.userSelect = 'none';
+
+    socket.close();
+});
+
 // Event handlers bound in HTML.
 
 window.addRow = () => {
