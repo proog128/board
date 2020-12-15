@@ -30,8 +30,10 @@ async function addItem(boardName, itemId, cellId, siblingId) {
         aggregations.addItem(item, cellId, siblingId)
     );
     if (result.modifiedCount == 0) {
-        throw (`Failed to insert item ${itemId} before ${siblingId} into cell ${cellId} in ${boardName}.`);
-    } 
+        console.log(`Failed to insert item ${itemId} before ${siblingId} into cell ${cellId} in ${boardName}.`);
+        return false;
+    }
+    return true;
 }
 
 async function moveItem(boardName, itemId, cellId, siblingId) {
@@ -40,8 +42,10 @@ async function moveItem(boardName, itemId, cellId, siblingId) {
         aggregations.moveItem(itemId, cellId, siblingId)
     );
     if (result.modifiedCount == 0) {
-        throw (`Failed to move item ${itemId} before ${siblingId} into cell ${cellId} in ${boardName}.`);
-    } 
+        console.log(`Failed to move item ${itemId} before ${siblingId} into cell ${cellId} in ${boardName}.`);
+        return false;
+    }
+    return true;
 }
 
 async function deleteItem(boardName, itemId) {
@@ -50,8 +54,10 @@ async function deleteItem(boardName, itemId) {
         aggregations.deleteItem(itemId)
     );
     if (result.modifiedCount == 0) {
-        throw (`Failed to delete item ${itemId} in ${boardName}.`);
+        console.log(`Failed to delete item ${itemId} in ${boardName}.`);
+        return false;
     } 
+    return true;
 }
 
 async function getItemPos(boardName, itemId) {
@@ -59,7 +65,8 @@ async function getItemPos(boardName, itemId) {
         { name: boardName },
         { projection: aggregations.getItemPos(itemId)});
     if (result.length == 0) {
-        throw (`Failed to retrieve item ${itemId} in ${boardName}.`);
+        console.log(`Failed to retrieve item ${itemId} in ${boardName}.`);
+        return null;
     }
     return result.result[0];
 }
@@ -70,8 +77,10 @@ async function updateItem(boardName, itemId, data) {
         aggregations.updateItem(itemId, data)
     );
     if (result.modifiedCount == 0) {
-        throw (`Failed to update item ${itemId} in ${boardName}.`);
+        console.log(`Failed to update item ${itemId} in ${boardName}.`);
+        return false;
     }
+    return true;
 }
 
 async function getItem(boardName, itemId) {
@@ -79,7 +88,8 @@ async function getItem(boardName, itemId) {
         { name: boardName },
         { projection: aggregations.getItem(itemId)});
     if (result.length == 0) {
-        throw (`Failed to retrieve item ${itemId} in ${boardName}.`);
+        console.log(`Failed to retrieve item ${itemId} in ${boardName}.`);
+        return null;
     }
     return result.result[0];
 }
@@ -101,8 +111,10 @@ async function addRow(boardName, rowId, cellIds, headerId, siblingId) {
         aggregations.addRow(row, siblingId)
     );
     if (result.modifiedCount == 0) {
-        throw (`Failed to insert row ${rowId} before ${siblingId} into ${boardName}.`);
+        console.log(`Failed to insert row ${rowId} before ${siblingId} into ${boardName}.`);
+        return false;
     }
+    return true;
 }
 
 async function moveRow(boardName, rowId, siblingId) {
@@ -111,8 +123,10 @@ async function moveRow(boardName, rowId, siblingId) {
         aggregations.moveRow(rowId, siblingId)
     );
     if (result.modifiedCount == 0) {
-        throw (`Failed to move row ${rowId} to ${siblingId} in board ${boardName}.`);
+        console.log(`Failed to move row ${rowId} to ${siblingId} in board ${boardName}.`);
+        return false;
     }
+    return true;
 }
 
 async function deleteRow(boardName, rowId) {
@@ -125,8 +139,10 @@ async function deleteRow(boardName, rowId) {
         }}
     );
     if (result.modifiedCount == 0) {
-        throw (`Failed to delete row ${rowId} of ${boardName}.`);
+        console.log(`Failed to delete row ${rowId} of ${boardName}.`);
+        return false;
     }
+    return true;
 }
 
 async function getRowPos(boardName, rowId) {
@@ -134,7 +150,8 @@ async function getRowPos(boardName, rowId) {
         { name: boardName },
         { projection: aggregations.getRowPos(rowId)});
     if (result.length == 0) {
-        throw (`Failed to retrieve row ${rowId} in ${boardName}.`);
+        console.log(`Failed to retrieve row ${rowId} in ${boardName}.`);
+        return null;
     }
     return result.result[0];
 }
@@ -176,104 +193,66 @@ io.on('connect', (socket) => {
         console.log('user disconnected');
     });
     socket.on('additem', async (itemId, cellId, siblingId) => {
-        try {
-            await addItem(boardName, itemId, cellId, siblingId);
-        } catch (err) {
-            console.log(err);
-        }
-        try {
-            const pos = await getItemPos(boardName, itemId);
+        await addItem(boardName, itemId, cellId, siblingId);
+        const pos = await getItemPos(boardName, itemId);
+        if (pos) {
             io.in(boardName).emit('additem', itemId, pos.cellId, pos.siblingId);
-        } catch (err) {
+        } else {
             io.in(boardName).emit('deleteitem', itemId);
-            console.log(err);
-        }            
+        }
     });
     socket.on('updateitemcontent', async (itemId, content) => {
-        try {
-            await updateItem(boardName, itemId, { content: content });
-        } catch (err) {
-            console.log(err);
-        }
-        try {
-            const item = await getItem(boardName, itemId);
+        await updateItem(boardName, itemId, { content: content });
+        const item = await getItem(boardName, itemId);
+        if (item) {
             io.in(boardName).emit('updateitemcontent', itemId, item.content);
-        } catch (err) {
+        } else {
             io.in(boardName).emit('deleteitem', itemId);
-            console.log(err);
         }
     });
     socket.on('updateitemcolor', async (itemId, color) => {
-        try {
-            await updateItem(boardName, itemId, { color: color });
-        } catch (err) {
-            console.log(err);
-        }
-        try {
-            const item = await getItem(boardName, itemId);
+        await updateItem(boardName, itemId, { color: color });
+        const item = await getItem(boardName, itemId);
+        if (item) {
             io.in(boardName).emit('updateitemcolor', item, item.color);
-        } catch (err) {
+        } else {
             io.in(boardName).emit('deleteitem', itemId);
-            console.log(err);
         }
 
     });
     socket.on('deleteitem', async (itemId) => {
-        try {
-            await deleteItem(boardName, itemId);
-        } catch (err) {
-            console.log(err);
-        }
+        await deleteItem(boardName, itemId);
         io.in(boardName).emit('deleteitem', itemId);
     });
     socket.on('moveitem', async (itemId, cellId, siblingId) => {
-        try {
-            await moveItem(boardName, itemId, cellId, siblingId);
-        } catch (err) {
-            console.log(err);
-        }
-        try {
-            const pos = await getItemPos(boardName, itemId);
+        await moveItem(boardName, itemId, cellId, siblingId);
+        const pos = await getItemPos(boardName, itemId);
+        if (pos) {
             io.in(boardName).emit('moveitem', itemId, pos.cellId, pos.siblingId);
-        } catch (err) {
+        } else {
             io.in(boardName).emit('deleteitem', itemId);
-            console.log(err);
         }
     });
     socket.on('addrow', async (rowId, cellIds, headerId, siblingId) => {
-        try {
-            await addRow(boardName, rowId, cellIds, headerId, siblingId);
-        } catch (err) {
-            console.log(err);
-        }
-        try {
-            const pos = await getRowPos(boardName, rowId);
+        await addRow(boardName, rowId, cellIds, headerId, siblingId);
+        const pos = await getRowPos(boardName, rowId);
+        if (pos) {
             io.in(boardName).emit('addrow', rowId, cellIds, headerId, pos.siblingId);
-        } catch (err) {
+        } else {
             io.in(boardName).emit('deleterow', rowId);
-            console.log(err);
         }            
     });
     socket.on('moverow', async (rowId, siblingId) => {
-        try {
-            await moveRow(boardName, rowId, siblingId);
-        } catch (err) {
-            console.log(err);
-        }
-        try {
-            const pos = await getRowPos(boardName, rowId);
+        await moveRow(boardName, rowId, siblingId);
+        const pos = await getRowPos(boardName, rowId);
+        if (pos) {
             io.in(boardName).emit('moverow', rowId, pos.siblingId);
-        } catch (err) {
+        } else {
             io.in(boardName).emit('deleterow', rowId);
-            console.log(err);
         }
     });
     socket.on('deleterow', async (rowId) => {
-        try {
-            await deleteRow(boardName, rowId);
-        } catch (err) {
-            console.log(err);
-        }
+        await deleteRow(boardName, rowId);
         io.in(boardName).emit('deleterow', rowId);
     });
 });
