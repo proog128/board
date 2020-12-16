@@ -7,8 +7,10 @@ const demoBoard = require('./demoBoard');
 const aggregations = require('./aggregations');
 const MongoClient = require('mongodb').MongoClient;
 
-const mongoUri = 'mongodb://root:example@localhost:27017/?poolSize=20&w=majority';
-const mongo = new MongoClient(mongoUri);
+const PORT = process.env.PORT || 3000;
+const DB = process.env.DB || 'mongodb://root:example@localhost:27017/?poolSize=20&w=majority';
+
+const mongo = new MongoClient(DB);
 
 let boards = null;
 
@@ -312,8 +314,8 @@ async function run() {
 
         await boards.createIndex('name', { unique: true });
 
-        http.listen(3000, () => {
-            console.log('listening on *:3000');
+        http.listen(PORT, () => {
+            console.log(`listening on *:${PORT}`);
         });    
     } catch(err) {
         console.log(err);
