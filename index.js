@@ -4,7 +4,6 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const demoBoard = require('./demoBoard');
-const emptyBoard = require('./emptyBoard');
 const aggregations = require('./aggregations');
 const MongoClient = require('mongodb').MongoClient;
 
@@ -13,11 +12,20 @@ const mongo = new MongoClient(mongoUri);
 
 let boards = null;
 
-function createEmptyBoard(boardName) {
-    board = { ...emptyBoard.board };
-    board['name'] = boardName;
-    board['title'] = boardName;
-    return board;
+async function createBoard(boardName, title, columns) {
+    const board = {
+        name: boardName,
+        title: title,
+        columns: [''].concat(columns),
+        rows: []
+    };
+    try {
+        await boards.insertOne(board);
+    } catch (err) {
+        console.log(`Failed to create board ${boardName}. ${err.message}.`);
+        return false;
+    }
+    return true;
 }
 
 async function addItem(boardName, itemId, cellId, siblingId) {
@@ -183,9 +191,10 @@ app.get('/api/:board', async (req, res) => {
     try {
         let board = await boards.findOne({ name: req.params.board });
         if (board == null) {
-            board = createEmptyBoard(req.params.board);
+            res.send({})
+        } else {
+            res.send(board);
         }
-        res.send(board);
     } catch(err) {
         res.send('ERR: ' + err, 500);
     }
@@ -270,6 +279,10 @@ io.on('connect', (socket) => {
         await updateTitle(boardName, title);
         io.in(boardName).emit('updatetitle', title);
     });
+    socket.on('createboard', async (title, columns, ack) => {
+        const success = await createBoard(boardName, title, columns);
+        ack(success);
+    });
 });
 
 async function run() {
@@ -278,6 +291,7 @@ async function run() {
         await mongo.db('boards').command({ ping: 1});
         const db = mongo.db('board');
         boards = db.collection('boards');
+        await boards.createIndex('name', { unique: true });
         
         http.listen(3000, () => {
             console.log('listening on *:3000');

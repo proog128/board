@@ -321,6 +321,14 @@ window.deleteItem = (el) => {
 window.titleEditFinished = (el) => {
     emitUpdateTitle(el.innerText);
 };
+window.createBoard = () => {
+    const title = document.getElementById('createBoardTitle').value;
+    let columns = document.getElementById('createBoardColumns').value;
+    columns = columns.split(/\n/).map(el => el.trim());
+    socket.emit('createboard', title, columns, (success) => {
+        location.reload();
+    });
+};
 
 window.onload = async () => {
     const table = document.querySelector('.table');
@@ -341,29 +349,41 @@ window.onload = async () => {
     }
   
     const data = await dataResponse.json();
+    if (Object.keys(data).length == 0) {
+        document.getElementById('createPage').style.display = 'block';
+        document.getElementById('createBoardID').value = boardName;
+        
+        let prettyBoardName = boardName
+            .split(/-|_| /)
+            .map(el => el.charAt(0).toUpperCase() + el.slice(1))
+            .join(' ');
+        document.getElementById('createBoardTitle').value = prettyBoardName;
+        document.getElementById('createBoardColumns').value = 'To Do\nIn Progress\nDone';
+    } else {
+        document.getElementById('mainPage').style.display = 'block';
+        updateTitle(data.title);
 
-    updateTitle(data.title);
-
-    numColumns = data.columns.length;   
-
-    const thead = document.querySelector('.table-header .row');
-    for (let i = 1; i < numColumns; ++i) {
-        const hcell = create('thcell');
-        hcell.innerText = data.columns[i];
-        thead.appendChild(hcell);
-    }
-
-    for (const rowData of data.rows) {
-        const rowId = rowData.id;
-        const cellIds = rowData.cells.map((c) => c.id);
-        const [newRow, cells] = addRow(rowId, cellIds);
-        rowData.cells.forEach((cellData, i) => {
-            cellData.items.forEach((itemData, j) => {
-                const itemId = itemData.id;
-                const sibling = itemData[i + 1]?.id;
-                addItem(cells[i], itemId, sibling, itemData.type,
-                    itemData.color, itemData.content);
+        numColumns = data.columns.length;   
+    
+        const thead = document.querySelector('.table-header .row');
+        for (let i = 1; i < numColumns; ++i) {
+            const hcell = create('thcell');
+            hcell.innerText = data.columns[i];
+            thead.appendChild(hcell);
+        }
+    
+        for (const rowData of data.rows) {
+            const rowId = rowData.id;
+            const cellIds = rowData.cells.map((c) => c.id);
+            const [newRow, cells] = addRow(rowId, cellIds);
+            rowData.cells.forEach((cellData, i) => {
+                cellData.items.forEach((itemData, j) => {
+                    const itemId = itemData.id;
+                    const sibling = itemData[i + 1]?.id;
+                    addItem(cells[i], itemId, sibling, itemData.type,
+                        itemData.color, itemData.content);
+                });
             });
-        });
+        }
     }
 }
