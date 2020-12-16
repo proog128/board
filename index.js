@@ -291,8 +291,13 @@ async function run() {
         await mongo.db('boards').command({ ping: 1});
         const db = mongo.db('board');
         boards = db.collection('boards');
+
+        try {
+            await boards.insertOne(demoBoard.board, { forceServerObjectId: true });
+        } catch {}
+
         await boards.createIndex('name', { unique: true });
-        
+
         http.listen(3000, () => {
             console.log('listening on *:3000');
         });    
