@@ -10,6 +10,10 @@ button {
     text-align: center;
 }
 
+button:hover {
+    border: 1px solid black;
+}
+
 #createPage {
     display: none;
 }
@@ -91,9 +95,7 @@ h2 {
 #connectionlost .message {
     position: fixed;
     top: 20px;
-    color: #fdf6e3;
-    background-color: #586e75;
-    border: 2px solid #93a1a1;
+    border: 2px solid black;
     border-radius: 4px;
     width: 50%;
     margin: auto;
@@ -150,6 +152,7 @@ h2 {
     margin: 2px;
     border-radius: 4px;
     position: relative;
+    border-left: 20px solid black;
 }
 
 .row > .toolbar {
@@ -199,6 +202,7 @@ h2 {
     text-align: center;
     display: block;
     font-weight: bold;
+    margin: auto;
 }
 
 .table-header .cell.row-header {
@@ -216,9 +220,7 @@ h2 {
     cursor: grab;
     transition: opacity 0.4s ease-in-out;
     text-align: center;
-    background-color: #586e75;
     vertical-align: middle;
-    color: #93a1a1;
     position: relative;
     display: table;
 }
@@ -235,7 +237,6 @@ h2 {
 }
 
 .item.large {
-    color: #fdf6e3;
     padding: 10px;
     margin: 5px;
     width: 130px;
@@ -254,13 +255,21 @@ h2 {
 }
 
 html, body {
-    background-color: #002b36;
-    color: #93a1a1;
+    background-color: #ffffff;
+    color: #333333;
 }
 
 .row {
-    background-color: #073642;
-    border-left: 20px solid #586e75;
+    background-color: #f3f3f3;
+    border-color: #dddddd;
+}
+
+.item {
+    background-color: #dddddd;
+}
+
+.item.large {
+    color: #fcfcfc;
 }
 
 .item.large.green {
@@ -276,23 +285,19 @@ html, body {
 }
 
 .table-header .row {
-    background-color: #586e75;
+    background-color: #dddddd;
 }
 
 .table-header .cell {
-    color: #93a1a1;
+    color: #fcfcfc;
 }
 
 h1.title {
-    color: #93a1a1;
+    color: #333333;
 }
 
 h2 {
-    color: #93a1a1;
-}
-
-button:hover {
-    cursor: pointer;
+    color: #333333;
 }
 
 button.dark {
@@ -300,8 +305,7 @@ button.dark {
 }
 
 button.dark:hover {
-    border: 1px solid #586e75;
-    cursor: pointer;
+    border-color: #333333;
 }
 
 button.light {
@@ -309,8 +313,7 @@ button.light {
 }
 
 button.light:hover {
-    border: 1px solid #0a5163;
-    cursor: pointer;
+    border-color: #fcfcfc;
 }
 
 button.red {
@@ -323,4 +326,83 @@ button.green {
 
 button.blue {
     background-color: #268bd2;
+}
+
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background-color: #002b36;
+        color: #93a1a1;
+    }
+
+    .row {
+        background-color: #073642;
+        border-color: #586e75;
+    }
+
+    .item {
+        background-color: #586e75;
+        color: #93a1a1;
+    }
+    
+    .item.large.green {
+        background-color: #859900;
+    }
+
+    .item.large.red {
+        background-color: #dc322f;
+    }
+
+    .item.large.blue {
+        background-color: #268bd2;
+    }
+
+    .table-header .row {
+        background-color: #586e75;
+    }
+
+    .table-header .cell {
+        color: #93a1a1;
+    }
+
+    h1.title {
+        color: #93a1a1;
+    }
+
+    h2 {
+        color: #93a1a1;
+    }
+
+    button.dark {
+        background-color: transparent;
+    }
+
+    button.dark:hover {
+        border-color: #586e75;
+    }
+
+    button.light {
+        background-color: transparent;
+    }
+
+    button.light:hover {
+        border-color: #0a5163;
+    }
+
+    button.red {
+        background-color: #dc322f;
+    }
+
+    button.green {
+        background-color: #859900;
+    }
+
+    button.blue {
+        background-color: #268bd2;
+    }
+
+    #connectionlost .message {
+        color: #fdf6e3;
+        background-color: #586e75;
+        border-color: #93a1a1;
+    }
 }
