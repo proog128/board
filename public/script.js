@@ -329,6 +329,13 @@ window.createBoard = () => {
         location.reload();
     });
 };
+window.deleteBoard = () => {
+    if (confirm(`Do you really want to delete the board "${boardName}" with all its contents?`)) {
+        socket.emit('deleteboard', (success) => {
+            location.reload();
+        });
+    }
+};
 
 window.onload = async () => {
     const table = document.querySelector('.table');

@@ -5,6 +5,11 @@ html, body {
     font-size: 16px;
 }
 
+button {
+    border: 0;
+    text-align: center;
+}
+
 #createPage {
     display: none;
 }
@@ -19,7 +24,6 @@ html, body {
     padding: 0;
     margin: 0;
 }
-
 
 #createPage form label {
     display: inline-block;
@@ -43,10 +47,12 @@ html, body {
 
 #createBoardButton {
     margin: 10px auto;
+    padding: 5px;
+    width: 120px;
     display: block;
 }
 
-form .hint {
+#createPage form .hint {
     font-size: 80%;
     font-style: italic;
 }
@@ -58,7 +64,7 @@ form .hint {
 h1.title {
     text-align: center;
     padding: 10px;
-    margin: 0;
+    margin: 0 50px;
 }
 
 h2 {
@@ -98,12 +104,44 @@ h2 {
     opacity: 1;
 }
 
+.main-toolbar {
+    position: absolute;
+    display: flex;
+    justify-content: flex-end;
+    top: 20px;
+    right: 20px;
+}
+
+.main-toolbar button {
+    margin-left: 5px;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+}
+
 .toolbar {
     position: absolute;
     display: flex;
     justify-content: flex-start;
     top: 5px;
     opacity: 0;
+}
+
+.toolbar button {
+    margin-left: 5px;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+}
+
+.row-header button {
+    margin-left: 5px;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
 }
 
 .row {
@@ -251,4 +289,38 @@ h1.title {
 
 h2 {
     color: #93a1a1;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+button.dark {
+    background-color: transparent;
+}
+
+button.dark:hover {
+    border: 1px solid #586e75;
+    cursor: pointer;
+}
+
+button.light {
+    background-color: transparent;
+}
+
+button.light:hover {
+    border: 1px solid #0a5163;
+    cursor: pointer;
+}
+
+button.red {
+    background-color: #dc322f;
+}
+
+button.green {
+    background-color: #859900;
+}
+
+button.blue {
+    background-color: #268bd2;
 }

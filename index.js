@@ -28,6 +28,16 @@ async function createBoard(boardName, title, columns) {
     return true;
 }
 
+async function deleteBoard(boardName) {
+    try {
+        await boards.remove({ name: boardName });
+    } catch (err) {
+        console.log(`Failed to delete board ${boardName}. ${err.message}.`);
+        return false;
+    }
+    return true;
+}
+
 async function addItem(boardName, itemId, cellId, siblingId) {
     const item = {
         id: itemId,
@@ -281,6 +291,10 @@ io.on('connect', (socket) => {
     });
     socket.on('createboard', async (title, columns, ack) => {
         const success = await createBoard(boardName, title, columns);
+        ack(success);
+    });
+    socket.on('deleteboard', async (ack) => {
+        const success = await deleteBoard(boardName);
         ack(success);
     });
 });

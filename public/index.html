@@ -7,13 +7,16 @@
     <body>
         <div id="mainPage">
             <h1 class="title" spellcheck="false" contenteditable="true" onFocusOut="titleEditFinished(this)"></h1>
+            <div class="main-toolbar">
+                <button class="dark" onclick="deleteBoard()">🗑️</button>
+            </div>
             <div class="table-header">
                 <div class="row">
                     <template id="thcell">
                         <div class="cell"></div>
                     </template>
                     <div class="cell row-header">
-                        <button id="addrow" onclick="addRow()">Add Row</button>
+                        <button class="light" id="addrow" onclick="addRow()">➕</button>
                     </div>
                 </div>
             </div>
@@ -21,23 +24,23 @@
                 <template id="trow">
                     <div class="row">
                         <div class="toolbar">
-                            <button tabindex="-1" onclick="deleteRow(this)">-</button>
+                            <button class="light" tabindex="-1" onclick="deleteRow(this)">➖</button>
                         </div>
                     </div>
                 </template>
                 <template id="tcell">
                     <div class="cell">
                         <div class="toolbar">
-                            <button tabindex="-1"  onclick="addItem(this)">+</button>
+                            <button class="light" tabindex="-1"  onclick="addItem(this)">➕</button>
                         </div>
                     </div>
                 </template>
                 <template id="titemheader">
                     <div class="item">
                         <div class="toolbar">
-                            <button tabindex="-1" onclick="changeColor(this, 'red')">R</button>
-                            <button tabindex="-1" onclick="changeColor(this, 'green')">G</button>
-                            <button tabindex="-1" onclick="changeColor(this, 'blue')">B</button>
+                            <button class="light red" tabindex="-1" onclick="changeColor(this, 'red')"> </button>
+                            <button class="light green" tabindex="-1" onclick="changeColor(this, 'green')"> </button>
+                            <button class="light blue" tabindex="-1" onclick="changeColor(this, 'blue')"> </button>
                         </div>
                         <div class="textarea" tabindex="0" spellcheck="false" contenteditable="true" onfocusout="editFinished(this)"></textarea>
                     </div>
@@ -45,7 +48,7 @@
                 <template id="titem">
                     <div class="item">
                         <div class="toolbar">
-                            <button tabindex="-1" onclick="deleteItem(this)">Delete</button>
+                            <button class="light" tabindex="-1" onclick="deleteItem(this)">🗑️</button>
                         </div>
                         <div class="textarea" tabindex="0" spellcheck="false" contenteditable="true" onfocusout="editFinished(this)"></textarea>
                     </div>
