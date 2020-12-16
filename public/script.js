@@ -327,8 +327,8 @@ window.onload = async () => {
     numColumns = data.columns.length;
     
     const thead = document.querySelector('.table-header .row');
-    for (let i = 0; i < numColumns; ++i) {
-        const hcell = create(i == 0 ? 'thcellfirst' : 'thcell');
+    for (let i = 1; i < numColumns; ++i) {
+        const hcell = create('thcell');
         hcell.innerText = data.columns[i];
         thead.appendChild(hcell);
     }

@@ -99,6 +99,11 @@ html, body {
     display: block;
 }
 
+.table-header .cell.row-header {
+    text-align: left;
+    display: block;
+}
+
 .item {
     width: 100px;
     height: 100px;
