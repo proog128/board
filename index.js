@@ -7,8 +7,8 @@ const demoBoard = require('./demoBoard');
 const aggregations = require('./aggregations');
 const MongoClient = require('mongodb').MongoClient;
 
-const PORT = process.env.PORT || 3000;
-const DB = process.env.DB || 'mongodb://root:example@localhost:27017/?poolSize=20&w=majority';
+const PORT = process.env.BOARD_PORT || 3000;
+const DB = process.env.BOARD_DB || 'mongodb://root:example@localhost:27017/?poolSize=20&w=majority';
 
 const mongo = new MongoClient(DB);
 

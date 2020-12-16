@@ -1,0 +1,21 @@
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ${BOARD_DB}:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  board:
+    image: board
+    restart: always
+    ports:
+      - ${BOARD_PORT}:${BOARD_PORT}
+    environment:
+      - BOARD_PORT=${BOARD_PORT}
+      - BOARD_DB=mongodb://root:example@mongo:27017/?poolSize=20&w=majority
