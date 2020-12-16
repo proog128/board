@@ -16,7 +16,7 @@ let boards = null;
 function createEmptyBoard(boardName) {
     board = { ...emptyBoard.board };
     board['name'] = boardName;
-    board['displayName'] = boardName;
+    board['title'] = boardName;
     return board;
 }
 
@@ -156,6 +156,17 @@ async function getRowPos(boardName, rowId) {
     return result.result[0];
 }
 
+async function updateTitle(boardName, title) {
+    const result = await boards.updateOne(
+        { name: boardName },
+        { $set: { title: title }});
+    if (result.modifiedCount == 0) {
+        console.log(`Failed to update title of board ${boardName}. Maybe the title did not change?`);
+        return false;
+    }
+    return true;
+}
+
 app.get('/api/demo/reset', async (req, res) => {
     try {
         const result = await boards.replaceOne({ name: 'demo' }, demoBoard.board, { upsert: true });
@@ -254,6 +265,10 @@ io.on('connect', (socket) => {
     socket.on('deleterow', async (rowId) => {
         await deleteRow(boardName, rowId);
         io.in(boardName).emit('deleterow', rowId);
+    });
+    socket.on('updatetitle', async (title) => {
+        await updateTitle(boardName, title);
+        io.in(boardName).emit('updatetitle', title);
     });
 });
 

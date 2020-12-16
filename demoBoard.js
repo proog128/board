@@ -1,6 +1,6 @@
 const board = {
     name: 'demo',
-    displayName: 'Demo Board',
+    title: 'Demo Board',
     columns: ['', 'To Do', 'In Progress', 'Done'],
     rows: [
         {
@@ -102,7 +102,7 @@ const board = {
 /*
 const board = {
     name: 'demo',
-    displayName: 'Demo Board',
+    title: 'Demo Board',
     columns: ['', 'To Do', 'In Progress', 'Done'],
     rows: [ 'ad83cace-51b7-4a4c-85ad-b9b608e6192a',
             '8d8ffa0d-edef-4b4e-a112-009b6c7b8b1e' ],

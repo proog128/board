@@ -5,6 +5,11 @@ html, body {
     background-color: #002b36;
 }
 
+h1.title {
+    text-align: center;
+    padding-top: 10px;
+}
+
 #connectionlost {
     visibility: hidden;
 }
@@ -97,6 +102,7 @@ html, body {
 .table-header .cell {
     text-align: center;
     display: block;
+    font-weight: bold;
 }
 
 .table-header .cell.row-header {
@@ -174,5 +180,8 @@ html, body {
 
 .table-header .cell {
     color: #93a1a1;
-    font-weight: bold;
+}
+
+h1.title {
+    color: #93a1a1;
 }

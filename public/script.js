@@ -145,6 +145,12 @@ function deleteRow(row) {
     row.remove();
 }
 
+// Update the board title
+function updateTitle(title) {
+    const titleElement = document.querySelector('h1.title');
+    titleElement.innerText = title;
+}
+
 // Send message to server.
 
 function emitAddItem(item, cell, sibling) {
@@ -177,6 +183,10 @@ function emitDeleteRow(row) {
 
 function emitMoveRow(row, sibling) {
     socket.emit('moverow', row.id, sibling?.id);
+}
+
+function emitUpdateTitle(title) {
+    socket.emit('updatetitle', title);
 }
 
 // Receive messages from server.
@@ -252,6 +262,10 @@ socket.on('deleterow', (rowId) => {
     }
 });
 
+socket.on('updatetitle', (title) => {
+    updateTitle(title);
+});
+
 socket.on('errormsg', (message) => {
     console.log(`Error returned from server: ${message}`);
 });
@@ -304,6 +318,9 @@ window.deleteItem = (el) => {
     deleteItem(item);
     emitDeleteItem(item);
 };
+window.titleEditFinished = (el) => {
+    emitUpdateTitle(el.innerText);
+};
 
 window.onload = async () => {
     const table = document.querySelector('.table');
@@ -324,8 +341,11 @@ window.onload = async () => {
     }
   
     const data = await dataResponse.json();
-    numColumns = data.columns.length;
-    
+
+    updateTitle(data.title);
+
+    numColumns = data.columns.length;   
+
     const thead = document.querySelector('.table-header .row');
     for (let i = 1; i < numColumns; ++i) {
         const hcell = create('thcell');
