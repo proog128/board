@@ -328,6 +328,11 @@ button.blue {
     background-color: #268bd2;
 }
 
+#connectionlost .message {
+    background-color: #ffffff;
+    border-color: #93a1a1;
+}
+
 @media (prefers-color-scheme: dark) {
     html, body {
         background-color: #002b36;
