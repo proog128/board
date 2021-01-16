@@ -6,7 +6,7 @@
     </head>
     <body>
         <div id="mainPage">
-            <h1 class="title" spellcheck="false" contenteditable="true" onFocusOut="titleEditFinished(this)"></h1>
+            <h1 class="title" spellcheck="false" contenteditable="true" onFocusOut="titleEditFinished(this)" oncut="titleEdit(this)" onpaste="titleEdit(this)" onkeyup="titleEdit(this)"></h1>
             <div class="main-toolbar">
                 <button class="dark" onclick="deleteBoard()">🗑️</button>
             </div>
@@ -42,7 +42,7 @@
                             <button class="light green" tabindex="-1" onclick="changeColor(this, 'green')"> </button>
                             <button class="light blue" tabindex="-1" onclick="changeColor(this, 'blue')"> </button>
                         </div>
-                        <div class="textarea" tabindex="0" spellcheck="false" contenteditable="true" onfocusout="editFinished(this)"></textarea>
+                        <div class="textarea" tabindex="0" spellcheck="false" contenteditable="true" onfocusout="editFinished(this)" oncut="edit(this)" onpaste="edit(this)" onkeyup="edit(this)"></textarea>
                     </div>
                 </template>
                 <template id="titem">
@@ -50,7 +50,7 @@
                         <div class="toolbar">
                             <button class="light" tabindex="-1" onclick="deleteItem(this)">🗑️</button>
                         </div>
-                        <div class="textarea" tabindex="0" spellcheck="false" contenteditable="true" onfocusout="editFinished(this)"></textarea>
+                        <div class="textarea" tabindex="0" spellcheck="false" contenteditable="true" onfocusout="editFinished(this)" oncut="edit(this)" onpaste="edit(this)" onkeyup="edit(this)"></textarea>
                     </div>
                 </template>
             </div>

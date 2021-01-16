@@ -55,7 +55,10 @@ function addItem(cell, id, sibling, type, color, content) {
 
 // Updates the text content of an item.
 function updateItemContent(item, content) {
-    item.querySelector('.textarea').innerText = content;
+    const current = item.querySelector('.textarea').innerText;
+    if (current != content) {
+        item.querySelector('.textarea').innerText = content;
+    }
 }
 
 // Change color of an item to color. Colors correspond to CSS classes
@@ -145,11 +148,18 @@ function deleteRow(row) {
     row.remove();
 }
 
+// Returns the title element
+function getTitleElement() {
+    return document.querySelector('h1.title');
+}
+
 // Update the board title
 function updateTitle(title) {
-    const titleElement = document.querySelector('h1.title');
-    titleElement.innerText = title;
-    document.title = title;
+    const titleElement = getTitleElement();
+    if (titleElement.innerText != title) {
+        titleElement.innerText = title;
+        document.title = title;    
+    }
 }
 
 // Send message to server.
@@ -266,6 +276,7 @@ socket.on('deleterow', (rowId) => {
 
 socket.on('updatetitle', (title) => {
     updateTitle(title);
+    getTitleElement().dataset.sync = title;
 });
 
 socket.on('errormsg', (message) => {
@@ -305,9 +316,23 @@ window.addItem = (el) => {
     emitAddItem(item, cell, item.nextElementSibling);
     item.querySelector('.textarea').focus();
 };
+window.edit = (el) => {
+    let item = el.closest('.item');
+    clearTimeout(item.dataset.timer);
+    item.dataset.timer = setTimeout(() => {
+        const textarea = item.querySelector('.textarea');
+        const content = textarea.innerText;
+        if (content != item.dataset.sync) {
+            emitUpdateItemContent(item, content);
+        }
+    }, 1000);
+};
 window.editFinished = (el) => {
     const item = el.closest('.item');
-    const content = item.querySelector('.textarea').innerText;
+    clearTimeout(item.dataset.timer);
+    const textarea = item.querySelector('.textarea');
+    const content = textarea.innerText;
+    textarea.innerText = textarea.innerText;    // remove formatting
     if (content != item.dataset.sync) {
         emitUpdateItemContent(item, content);
     }
@@ -322,9 +347,21 @@ window.deleteItem = (el) => {
     deleteItem(item);
     emitDeleteItem(item);
 };
+window.titleEdit = (el) => {
+    clearTimeout(el.dataset.timer);
+    el.dataset.timer = setTimeout(() => {
+        const title = el.innerText;
+        if (title != el.dataset.sync) {
+            emitUpdateTitle(el.innerText);
+        }
+    }, 1000);
+};
 window.titleEditFinished = (el) => {
-    updateTitle(el.innerText)
-    emitUpdateTitle(el.innerText);
+    updateTitle(el.innerText)   // remove formatting
+    const title = el.innerText;
+    if (title != el.dataset.sync) {
+        emitUpdateTitle(el.innerText);
+    }
 };
 window.createBoard = () => {
     const title = document.getElementById('createBoardTitle').value;
@@ -374,6 +411,7 @@ window.onload = async () => {
     } else {
         document.getElementById('mainPage').style.display = 'block';
         updateTitle(data.title);
+        getTitleElement().dataset.sync = data.title;
 
         numColumns = data.columns.length;   
     
@@ -394,7 +432,7 @@ window.onload = async () => {
                     const sibling = itemData[i + 1]?.id;
                     let item = addItem(cells[i], itemId, sibling, itemData.type,
                         itemData.color, itemData.content);
-                        item.dataset.sync = itemData.content;
+                    item.dataset.sync = itemData.content;
                 });
             });
         }
