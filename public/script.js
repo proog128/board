@@ -213,6 +213,7 @@ socket.on('updateitemcontent', (itemId, content) => {
     const item = document.getElementById(itemId);
     if (item) {
         updateItemContent(item, content);
+        item.dataset.sync = content;
     }
 });
 
@@ -307,7 +308,9 @@ window.addItem = (el) => {
 window.editFinished = (el) => {
     const item = el.closest('.item');
     const content = item.querySelector('.textarea').innerText;
-    emitUpdateItemContent(item, content);
+    if (content != item.dataset.sync) {
+        emitUpdateItemContent(item, content);
+    }
 };
 window.changeColor = (el, color) => {
     const item = el.closest('.item');
@@ -389,8 +392,9 @@ window.onload = async () => {
                 cellData.items.forEach((itemData, j) => {
                     const itemId = itemData.id;
                     const sibling = itemData[i + 1]?.id;
-                    addItem(cells[i], itemId, sibling, itemData.type,
+                    let item = addItem(cells[i], itemId, sibling, itemData.type,
                         itemData.color, itemData.content);
+                        item.dataset.sync = itemData.content;
                 });
             });
         }
