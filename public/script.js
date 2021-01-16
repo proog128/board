@@ -149,6 +149,7 @@ function deleteRow(row) {
 function updateTitle(title) {
     const titleElement = document.querySelector('h1.title');
     titleElement.innerText = title;
+    document.title = title;
 }
 
 // Send message to server.
@@ -319,6 +320,7 @@ window.deleteItem = (el) => {
     emitDeleteItem(item);
 };
 window.titleEditFinished = (el) => {
+    updateTitle(el.innerText)
     emitUpdateTitle(el.innerText);
 };
 window.createBoard = () => {
