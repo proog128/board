@@ -168,7 +168,6 @@ h2 {
 
 .cell {
     display: flex;
-    margin: 5px;
     padding: 5px;
     flex-direction: row;
     flex-wrap: wrap;
@@ -176,6 +175,11 @@ h2 {
     flex-grow: 1;
     flex-basis: 0;
     align-content: flex-start;
+}
+
+.cell:not(:last-child) {
+    border-right-style: solid;
+    border-right-width: 2px;
 }
 
 .cell > .toolbar {
@@ -199,10 +203,9 @@ h2 {
 }
 
 .table-header .cell {
-    text-align: center;
-    display: block;
     font-weight: bold;
-    margin: auto;
+    justify-content: center;
+    align-content: center;
 }
 
 .table-header .cell.row-header {
@@ -262,6 +265,10 @@ html, body {
 .row {
     background-color: #f3f3f3;
     border-color: #dddddd;
+}
+
+.cell {
+    border-right-color: #ffffff;
 }
 
 .item {
@@ -339,6 +346,10 @@ button.blue {
         color: #93a1a1;
     }
 
+    .cell {
+        border-right-color: #002b36;
+    }
+    
     .row {
         background-color: #073642;
         border-color: #586e75;
