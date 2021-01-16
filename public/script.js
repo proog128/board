@@ -378,6 +378,28 @@ window.deleteBoard = () => {
         });
     }
 };
+window.onbeforeunload = (e) => {
+    if (!socket.connected) { return; }
+
+    // simple check for unsaved changes
+    // only checks for text changes, ignores moved items, rows etc.
+
+    const items = document.querySelectorAll('.item');
+    console.log(items.length);
+    let unsaved = false;
+    for (let i = 0; i < items.length; ++i) {
+        const item = items[i];
+        const content = item.querySelector('.textarea').innerText;
+        if (content != item.dataset.sync) {
+            unsaved = true;
+        }
+    }
+
+    if (unsaved) {
+        e.preventDefault();
+        e.returnValue = true;
+    }
+};
 
 window.onload = async () => {
     const table = document.querySelector('.table');
