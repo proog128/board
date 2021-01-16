@@ -78,6 +78,8 @@ function deleteItem(item) {
 // Move item from current position to the position
 // before sibling in cell with an animation.
 function moveItem(item, cell, sibling) {
+    if (item.nextElementSibling == sibling) return;
+
     const oldX = item.getBoundingClientRect().x;
     const oldY = item.getBoundingClientRect().y;
     cell.insertBefore(item, sibling);
@@ -126,6 +128,8 @@ function addRow(id, cellIds, sibling) {
 // Move row from current position to the position before
 // sibling with an animation.
 function moveRow(row, sibling) {
+    if (row.nextElementSibling == sibling) return;
+
     const table = document.querySelector('.table');
     const oldX = row.getBoundingClientRect().x;
     const oldY = row.getBoundingClientRect().y;
