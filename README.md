@@ -7,8 +7,8 @@ A real-time collaborative scrum board.
 ## Usage
 
 ```
-export BOARD_PORT=3000
-export BOARD_DB=./db
+echo BOARD_PORT=3000 > .env
+echo BOARD_DB=./db >> .env
 docker build -t board .
 docker-compose up
 ```
