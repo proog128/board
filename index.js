@@ -214,6 +214,7 @@ app.get('/api/:board', async (req, res) => {
 
 app.use('/style.css', express.static(path.join(__dirname, 'public', 'style.css')));
 app.use('/script.js', express.static(path.join(__dirname, 'public', 'script.js')));
+app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 app.use('/:board', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
