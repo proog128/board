@@ -212,7 +212,11 @@ app.get('/api/:board', async (req, res) => {
     }
 });
 
-app.use('/:board', express.static(path.join(__dirname, 'public')));
+app.use('/style.css', express.static(path.join(__dirname, 'public', 'style.css')));
+app.use('/script.js', express.static(path.join(__dirname, 'public', 'script.js')));
+app.use('/:board', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 app.use('/', (req, res) => {
     res.redirect('/demo');
 });
