@@ -207,7 +207,9 @@ function emitUpdateTitle(title) {
 // Receive messages from server.
 
 const socket = io({
-    'query': {
+    reconnectionDelay: 10000,
+    reconnectionDelayMax: 20000,
+    query: {
         'board': boardName
     }
 });
@@ -298,6 +300,15 @@ socket.on('disconnect', () => {
     table.style.userSelect = 'none';
 
     socket.close();
+
+    const reconnectTimer = () => {
+        socket.on('connect', () => {
+            location.reload();
+        });
+        // try to reconnect. will wait for a small random delay between attempts.
+        socket.open();
+    };
+    setTimeout(reconnectTimer, 5000);
 });
 
 // Event handlers bound in HTML.
