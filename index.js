@@ -251,7 +251,7 @@ io.on('connect', (socket) => {
         await updateItem(boardName, itemId, { color: color });
         const item = await getItem(boardName, itemId);
         if (item) {
-            io.in(boardName).emit('updateitemcolor', item, item.color);
+            io.in(boardName).emit('updateitemcolor', itemId, item.color);
         } else {
             io.in(boardName).emit('deleteitem', itemId);
         }
