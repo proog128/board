@@ -55,10 +55,13 @@ function addItem(cell, id, sibling, type, color, content) {
 
 // Updates the text content of an item.
 function updateItemContent(item, content) {
-    const current = item.querySelector('.textarea').innerText;
-    if (current != content) {
-        item.querySelector('.textarea').innerText = content;
+    const textarea = item.querySelector('.textarea');
+    const hasFocus = document.activeElement == textarea;
+    if (!hasFocus && textarea.innerText != content) {
+        textarea.innerText = content;
+        return true;
     }
+    return false;
 }
 
 // Change color of an item to color. Colors correspond to CSS classes
@@ -160,10 +163,13 @@ function getTitleElement() {
 // Update the board title
 function updateTitle(title) {
     const titleElement = getTitleElement();
-    if (titleElement.innerText != title) {
+    const hasFocus = document.activeElement == titleElement;
+    if (!hasFocus && titleElement.innerText != title) {
         titleElement.innerText = title;
-        document.title = title;    
+        document.title = title;
+        return true;
     }
+    return false;
 }
 
 // Send message to server.
@@ -228,8 +234,9 @@ socket.on('additem', (itemId, cellId, siblingId) => {
 socket.on('updateitemcontent', (itemId, content) => {
     const item = document.getElementById(itemId);
     if (item) {
-        updateItemContent(item, content);
-        item.dataset.sync = content;
+        if (updateItemContent(item, content)) {
+            item.dataset.sync = content;
+        }
     }
 });
 
@@ -281,8 +288,9 @@ socket.on('deleterow', (rowId) => {
 });
 
 socket.on('updatetitle', (title) => {
-    updateTitle(title);
-    getTitleElement().dataset.sync = title;
+    if (updateTitle(title)) {
+        getTitleElement().dataset.sync = title;
+    }
 });
 
 socket.on('errormsg', (message) => {
@@ -338,6 +346,7 @@ window.edit = (el) => {
         const textarea = item.querySelector('.textarea');
         const content = textarea.innerText;
         if (content != item.dataset.sync) {
+            item.dataset.sync = '###OUTDATED-NEEDSSYNC';
             emitUpdateItemContent(item, content);
         }
     }, 1000);
@@ -349,6 +358,7 @@ window.editFinished = (el) => {
     const content = textarea.innerText;
     textarea.innerText = textarea.innerText;    // remove formatting
     if (content != item.dataset.sync) {
+        item.dataset.sync = '###OUTDATED-NEEDSSYNC';
         emitUpdateItemContent(item, content);
     }
 };
@@ -367,6 +377,7 @@ window.titleEdit = (el) => {
     el.dataset.timer = setTimeout(() => {
         const title = el.innerText;
         if (title != el.dataset.sync) {
+            el.dataset.sync = '###OUTDATED-NEEDSSYNC';
             emitUpdateTitle(el.innerText);
         }
     }, 1000);
@@ -375,6 +386,7 @@ window.titleEditFinished = (el) => {
     updateTitle(el.innerText)   // remove formatting
     const title = el.innerText;
     if (title != el.dataset.sync) {
+        el.dataset.sync = '###OUTDATED-NEEDSSYNC';
         emitUpdateTitle(el.innerText);
     }
 };
@@ -400,7 +412,6 @@ window.onbeforeunload = (e) => {
     // only checks for text changes, ignores moved items, rows etc.
 
     const items = document.querySelectorAll('.item');
-    console.log(items.length);
     let unsaved = false;
     for (let i = 0; i < items.length; ++i) {
         const item = items[i];
