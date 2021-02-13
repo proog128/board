@@ -61,6 +61,9 @@ function updateItemContent(item, content) {
         textarea.innerText = content;
         return true;
     }
+    if (textarea.innerText == content) {
+        return true;
+    }
     return false;
 }
 
@@ -167,6 +170,9 @@ function updateTitle(title) {
     if (!hasFocus && titleElement.innerText != title) {
         titleElement.innerText = title;
         document.title = title;
+        return true;
+    }
+    if (titleElement.innerText != title) {
         return true;
     }
     return false;
