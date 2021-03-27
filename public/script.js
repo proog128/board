@@ -84,7 +84,9 @@ function deleteItem(item) {
 // Move item from current position to the position
 // before sibling in cell with an animation.
 function moveItem(item, cell, sibling) {
-    if (item.nextElementSibling == sibling) return;
+    if (item.nextElementSibling == sibling && item.parentNode == cell) {
+        return;
+    }
 
     const oldX = item.getBoundingClientRect().x;
     const oldY = item.getBoundingClientRect().y;
