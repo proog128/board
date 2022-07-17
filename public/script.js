@@ -1,5 +1,6 @@
 let numColumns = 0;
 const boardName = window.location.pathname.split('/').filter(s => s)[0];
+let ctrlPressed = false;
 
 // Create element from HTML template.
 function create(templateId) {
@@ -13,11 +14,16 @@ function initDrag(row) {
     const cellsArray = Array.prototype.slice.call(cells);
     const drake = dragula(cellsArray, {
         direction: 'horizontal',
+        isContainer: (el) => {
+            return ctrlPressed && el.classList.contains('cell') &&
+                   el.parentNode != null && el.parentNode.parentNode != null &&
+                   !el.parentNode.parentNode.classList.contains('table-header');
+        },
         invalid: (el, handle) => {
             return !(el.classList.contains('item') || el.classList.contains('textarea'));
         },
         accepts: (el, target, source, sibling) => {
-            if (source.parentNode != target.parentNode) {
+            if (!ctrlPressed && source.parentNode != target.parentNode) {
                 return false;
             }
             const isHeaderItem = el.classList.contains('large');
@@ -412,6 +418,12 @@ window.deleteBoard = () => {
             location.reload();
         });
     }
+};
+window.onkeydown = (e) => {
+    ctrlPressed = e.ctrlKey;
+};
+window.onkeyup = (e) => {
+    ctrlPressed = e.ctrlKey;
 };
 window.onbeforeunload = (e) => {
     if (!socket.connected) { return; }
