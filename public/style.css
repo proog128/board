@@ -323,16 +323,12 @@ button.light:hover {
     border-color: #fcfcfc;
 }
 
-button.red {
-    background-color: #dc322f;
-}
-
-button.green {
-    background-color: #859900;
-}
-
-button.blue {
-    background-color: #268bd2;
+button.color {
+    background: repeating-linear-gradient(
+        45deg,
+        #dc322f, #dc322f 35%,
+        #859900 35%, #859900 70%,
+        #268bd2 70%,#268bd2 100%)
 }
 
 #connectionlost .message {
@@ -404,16 +400,12 @@ button.blue {
         border-color: #0a5163;
     }
 
-    button.red {
-        background-color: #dc322f;
-    }
-
-    button.green {
-        background-color: #859900;
-    }
-
-    button.blue {
-        background-color: #268bd2;
+    button.color {
+        background: repeating-linear-gradient(
+            45deg,
+            #dc322f, #dc322f 35%,
+            #859900 35%, #859900 70%,
+            #268bd2 70%,#268bd2 100%)
     }
 
     #connectionlost .message {

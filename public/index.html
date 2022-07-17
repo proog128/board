@@ -38,9 +38,7 @@
                 <template id="titemheader">
                     <div class="item">
                         <div class="toolbar">
-                            <button class="light red" tabindex="-1" onclick="changeColor(this, 'red')"> </button>
-                            <button class="light green" tabindex="-1" onclick="changeColor(this, 'green')"> </button>
-                            <button class="light blue" tabindex="-1" onclick="changeColor(this, 'blue')"> </button>
+                            <button class="light color" tabindex="-1" onclick="cycleColor(this)"> </button>
                         </div>
                         <div class="textarea" tabindex="0" spellcheck="false" contenteditable="true" onfocusout="editFinished(this)" oncut="edit(this)" onpaste="edit(this)" onkeyup="edit(this)"></textarea>
                     </div>

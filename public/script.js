@@ -376,10 +376,26 @@ window.editFinished = (el) => {
         emitUpdateItemContent(item, content);
     }
 };
-window.changeColor = (el, color) => {
+window.cycleColor = (el) => {
     const item = el.closest('.item');
-    changeColor(item, color);
-    emitUpdateItemColor(item, color);
+    if (item.classList.contains('red')) {
+        item.classList.remove('red');
+        item.classList.add('green');
+        emitUpdateItemColor(item, 'green');
+        return;
+    }
+    if (item.classList.contains('green')) {
+        item.classList.remove('green');
+        item.classList.add('blue');
+        emitUpdateItemColor(item, 'blue');
+        return;
+    }
+    if (item.classList.contains('blue')) {
+        item.classList.remove('blue');
+        item.classList.add('red');
+        emitUpdateItemColor(item, 'red');
+        return;
+    }
 };
 window.deleteItem = (el) => {
     const item = el.closest('.item');
