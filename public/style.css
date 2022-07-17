@@ -127,7 +127,7 @@ h2 {
     display: flex;
     justify-content: flex-start;
     top: 5px;
-    opacity: 0;
+    visibility: hidden;
 }
 
 .toolbar button {
@@ -159,11 +159,11 @@ h2 {
     top: auto;
     left: -15px;
     bottom: 5px;
-    opacity: 0;
+    visibility: hidden;
 }
 
 .row:hover > .toolbar {
-    opacity: 1;
+    visibility: visible;
 }
 
 .cell {
@@ -189,11 +189,11 @@ h2 {
 }
 
 .cell:hover > .toolbar {
-    opacity: 1;
+    visibility: visible;
 }
 
 .cell.row-header:hover > .toolbar {
-    opacity: 0;
+    visibility: hidden;
 }
 
 .cell.row-header {
@@ -229,7 +229,7 @@ h2 {
 }
 
 .item:hover > .toolbar {
-    opacity: 1;
+    visibility: visible;
 }
 
 .item > .toolbar {
