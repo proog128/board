@@ -3,7 +3,7 @@ version: '3.1'
 services:
   mongo:
     image: mongo
-    restart: always
+    restart: unless-stopped
     ports:
       - 27017:27017
     volumes:
@@ -11,14 +11,12 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
-    restart: unless-stopped
   board:
     build: .
     image: board
-    restart: always
+    restart: unless-stopped
     ports:
       - ${BOARD_PORT}:${BOARD_PORT}
     environment:
       - BOARD_PORT=${BOARD_PORT}
       - BOARD_DB=mongodb://root:example@mongo:27017/?poolSize=20&w=majority
-    restart: unless-stopped
